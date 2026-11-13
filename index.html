@@ -8,6 +8,7 @@
 <header class="topbar"><a class="brand" href="#" id="brandHome"><span class="brand-mark">✦</span><span>IV<span class="brand-light">SCOUT</span></span></a><button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙</button></header>
 <main>
 <div id="scannerScreen">
+<div class="layout-debug" aria-live="polite"><strong id="layoutStatus">Layout: Auto → Phone</strong><label class="layout-quick-switch" for="layoutQuickControl"><span>Quick switch</span><select id="layoutQuickControl" aria-label="Quick layout switch"><option value="auto">Auto</option><option value="phone">Phone</option><option value="website">Website</option></select></label></div>
 <section class="build-info" aria-label="Build information">
   <div class="build-info-heading"><div class="eyebrow">APP INFO · STATIC METADATA</div><button id="resetCache" class="reset-cache-btn">Reset app cache</button></div>
   <div class="build-info-fields"><div><span>App version</span><strong>Unversioned static app</strong></div><div><span>Build identifier</span><strong>Not generated</strong></div><div><span>Build time</span><strong>Not recorded</strong></div></div>
@@ -42,6 +43,14 @@
   <section class="settings-card" aria-labelledby="appearanceTitle">
     <div class="section-heading"><div><div class="eyebrow">DISPLAY</div><h2 id="appearanceTitle">Appearance</h2></div></div>
     <fieldset class="theme-options"><legend class="field-label">Color theme</legend><label class="theme-option"><input type="radio" name="theme" value="dark"><span><strong>Dark</strong><small>Default</small></span></label><label class="theme-option"><input type="radio" name="theme" value="light"><span><strong>Light</strong><small>Bright backgrounds</small></span></label></fieldset>
+  </section>
+  <section class="settings-card" aria-labelledby="layoutSettingsTitle">
+    <div class="section-heading"><div><div class="eyebrow">LAYOUT</div><h2 id="layoutSettingsTitle">Screen layout</h2></div></div>
+    <fieldset class="layout-options"><legend class="field-label">Choose how IV Scout fits your screen</legend>
+      <label class="layout-mode-option"><input type="radio" name="layoutMode" value="auto"><span><strong>Auto</strong><small>Choose from device and viewport</small></span></label>
+      <label class="layout-mode-option"><input type="radio" name="layoutMode" value="phone"><span><strong>Phone</strong><small>Compact single column</small></span></label>
+      <label class="layout-mode-option"><input type="radio" name="layoutMode" value="website"><span><strong>Website</strong><small>Wider two column layout</small></span></label>
+    </fieldset>
   </section>
   <p class="settings-footnote">Settings and your collection stay on this device.</p>
 </section>
