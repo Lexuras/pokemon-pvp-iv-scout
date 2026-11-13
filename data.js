@@ -5,15 +5,16 @@ const CPM = [0.0939999967813491,0.135137430784308,0.166397869586944,0.1926509144
 function openDatabase(){return new Promise((resolve,reject)=>{const req=indexedDB.open('iv-scout-data',1);req.onupgradeneeded=()=>req.result.createObjectStore('cache');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function cacheGet(){try{const db=await openDatabase();return await new Promise((resolve,reject)=>{const req=db.transaction('cache').objectStore('cache').get('pokemon');req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}catch{return null}}
 async function cachePut(value){try{const db=await openDatabase();await new Promise((resolve,reject)=>{const tx=db.transaction('cache','readwrite');tx.objectStore('cache').put(value,'pokemon');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}catch{}}
+function labelPokemonForm(p){if(p.name.includes('('))return p;const base=p.name.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,''),id=String(p.id||'').toLocaleLowerCase().replace(/[^a-z0-9]+/g,'_'),prefix=base.replace(/([a-z])([0-9])/g,'$1_$2');if(!id.startsWith(prefix+'_'))return p;const suffix=id.slice(prefix.length+1).split('_').filter(Boolean);if(!suffix.length)return p;const labels={alola:'Alolan',alolan:'Alolan',galar:'Galarian',galarian:'Galarian',hisui:'Hisuian',hisuian:'Hisuian',paldea:'Paldean',paldean:'Paldean'};const form=suffix.map(s=>labels[s]||s[0].toLocaleUpperCase()+s.slice(1)).join(' ');p.name=`${p.name} (${form})`;return p}
 async function loadPokemonData(onStatus=()=>{}){
   onStatus('Loading Pokémon data…');
   try{
     const response=await fetch(GM_URL,{cache:'no-cache'});if(!response.ok)throw new Error('Game data request failed');
     const master=await response.json();const source=master.pokemon||master;
     const data=source.filter(p=>p.speciesId&&p.speciesName&&p.baseStats&&p.baseStats.atk>0&&p.baseStats.def>0&&p.baseStats.hp>0)
-      .map(p=>({id:p.speciesId,name:p.speciesName,dex:p.dex||0,atk:p.baseStats.atk,def:p.baseStats.def,hp:p.baseStats.hp,alias:p.aliasId||null,levelCap:Math.min(50,p.levelCap||50)}));
+      .map(p=>labelPokemonForm({id:p.speciesId,name:p.speciesName,dex:p.dex||0,atk:p.baseStats.atk,def:p.baseStats.def,hp:p.baseStats.hp,alias:p.aliasId||null,levelCap:Math.min(50,p.levelCap||50)}));
     const result={timestamp:master.timestamp||new Date().toISOString(),pokemon:data};await cachePut(result);return result;
-  }catch(error){const cached=await cacheGet();if(cached){onStatus('Using saved Pokémon data');return cached}throw error}
+  }catch(error){const cached=await cacheGet();if(cached){cached.pokemon=cached.pokemon.map(labelPokemonForm);onStatus('Using saved Pokémon data');return cached}throw error}
 }
 function cpAt(p,iv,level){const m=CPM[Math.round(level*2-2)];return Math.max(10,Math.floor((p.atk+iv[0])*Math.sqrt(p.def+iv[1])*Math.sqrt(p.hp+iv[2])*m*m/10))}
 function statsAt(p,iv,level){const m=CPM[Math.round(level*2-2)];const a=(p.atk+iv[0])*m,d=(p.def+iv[1])*m,h=p.id==='shedinja'?10:Math.max(10,Math.floor((p.hp+iv[2])*m));return {cp:Math.max(10,Math.floor(a*Math.sqrt((p.def+iv[1])*(p.hp+iv[2]))*m/10)),sp:a*d*h}}

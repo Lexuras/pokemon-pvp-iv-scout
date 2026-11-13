@@ -6,7 +6,7 @@ An iPhone-oriented installable web app for uploading a Pokémon GO appraisal scr
 
 Serve this directory from an HTTPS origin, then open it in iPhone Safari. Camera access and service workers require a secure origin. For a quick Mac-only preview, `python3 -m http.server 8000` works for layout and manual entry, but it does not provide iPhone camera access or installability.
 
-The app downloads the PvPoke Game Master when online and stores normalized Pokémon data in IndexedDB for later offline use. The first successful load requires internet access. Screenshot OCR runs locally in the browser with Tesseract.js; it uses no API key and does not upload the image. On first use, the OCR library, WebAssembly core, and English language model are downloaded from CDNs. Offline OCR is available only if the browser retained those downloaded files. OCR reads the name and CP where legible; IV bar values are estimates and must be checked before saving.
+The app downloads the PvPoke Game Master when online and stores normalized Pokémon data in IndexedDB for later offline use. The first successful load requires internet access. Screenshot OCR runs locally in the browser with Tesseract.js; it uses no API key and does not upload the image. On first use, the OCR library, WebAssembly core, and English language model are downloaded from CDNs. Offline OCR is available only if the browser retained those downloaded files. Name and CP recognition uses cropped appraisal-screen areas; IV values are read from the three colored appraisal bars and should still be reviewed before saving. If multiple forms share the same displayed name in Pokémon GO, confirm the form in the Pokémon field before trusting its rank.
 
 ## Ranking method
 
