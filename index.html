@@ -7,6 +7,7 @@
 <div class="app-shell">
 <header class="topbar"><a class="brand" href="#"><span class="brand-mark">✦</span><span>IV<span class="brand-light">SCOUT</span></span></a><button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙</button></header>
 <main>
+<div id="scannerScreen">
 <section class="intro"><div class="eyebrow"><span class="live-dot"></span> SCREENSHOT SCAN</div><h1>Check your Pokémon<br><span>before you power up.</span></h1><p>Upload an appraisal screenshot to fill in Pokémon details, CP, and IVs for a league rank check.</p></section>
 <section class="camera-card hidden">
 <div class="camera-top"><span><i class="pulse"></i> CAMERA PREVIEW</span><span id="cameraStatus">READY</span></div>
@@ -20,7 +21,22 @@
 <div class="iv-grid"><div class="iv-control"><div class="iv-head"><span>⚔ ATTACK</span><strong id="attackValue">0</strong></div><input id="attack" type="range" min="0" max="15" value="0"><div class="range-labels"><span>0</span><span>15</span></div></div><div class="iv-control"><div class="iv-head"><span>◈ DEFENSE</span><strong id="defenseValue">15</strong></div><input id="defense" type="range" min="0" max="15" value="15"><div class="range-labels"><span>0</span><span>15</span></div></div><div class="iv-control"><div class="iv-head"><span>♥ HP</span><strong id="hpValue">15</strong></div><input id="hp" type="range" min="0" max="15" value="15"><div class="range-labels"><span>0</span><span>15</span></div></div></div>
 <button id="analyze" class="primary-btn">Check PvP potential <span>→</span></button></section>
 <section id="results" class="results hidden"><div class="section-heading"><div><div class="eyebrow">SCAN RESULT</div><h2 id="resultName">Azumarill</h2></div><button id="dismiss" class="icon-btn">×</button></div><div class="league-list" id="leagueList"></div><div class="preview-note rank-method">Ranks compare all 4,096 IV combinations for this Pokémon form by maximum stat product under the league CP cap. They do not predict PvP battle performance.</div><div class="nickname-box"><div><div class="eyebrow">SUGGESTED NICKNAME</div><strong id="nickname">R1 GL</strong></div><button id="copyName" class="copy-btn">Copy</button></div><div id="nicknameHelp" class="preview-note"></div><button id="savePokemon" class="secondary-btn">＋ Add confirmed scan to collection</button></section>
-<section class="collection" id="collectionSection"><div class="section-heading"><div><div class="eyebrow">YOUR SESSION</div><h2>Scanned Pokémon</h2></div><span class="count" id="count">0</span></div><div id="collection" class="empty-state">Your scans will show up here.</div></section>
-<div class="data-credit">Game data: <a href="https://github.com/pvpoke/pvpoke/blob/master/src/data/gamemaster.json" target="_blank" rel="noreferrer">PvPoke Game Master</a> · MIT License</div></main><nav class="bottom-nav"><a class="active" href="#"><span>⌾</span> Scanner</a><a href="#collectionSection"><span>▤</span> Collection</a><button id="navSettings"><span>⚙</span> Settings</button></nav>
+<div class="data-credit">Game data: <a href="https://github.com/pvpoke/pvpoke/blob/master/src/data/gamemaster.json" target="_blank" rel="noreferrer">PvPoke Game Master</a> · MIT License</div>
+</div>
+<section id="collectionScreen" class="collection-screen hidden" aria-labelledby="collectionTitle">
+<div class="section-heading collection-page-heading"><div><div class="eyebrow">YOUR COLLECTION</div><h2 id="collectionTitle">Scanned Pokémon</h2></div><span class="count" id="count">0</span></div>
+<div class="collection-controls">
+<label class="collection-field field-label" for="collectionSearch">Search Pokémon or form<input id="collectionSearch" class="collection-input" type="search" placeholder="Try a name or form…" autocomplete="off"></label>
+<div class="collection-filter-row">
+<label class="collection-field field-label" for="collectionLeague">League<select id="collectionLeague" class="collection-select"><option value="all">All leagues</option><option value="GL">Great League</option><option value="UL">Ultra League</option><option value="ML">Master League</option></select></label>
+<label class="collection-field field-label" for="collectionSort">Sort by<select id="collectionSort" class="collection-select"><option value="recent">Recently added</option><option value="rank">Best rank</option></select></label>
+</div>
+<div class="collection-actions"><span id="collectionSummary" class="collection-summary" aria-live="polite">0 saved scans</span><button id="clearCollectionBtn" class="clear-collection-btn" type="button" disabled>Clear collection</button></div>
+</div>
+<div id="collection" class="collection-list empty-state" aria-live="polite">Your confirmed scans will stay here on this device.</div>
+</section>
+</main>
+<dialog id="clearCollectionDialog" class="confirm-dialog" aria-labelledby="clearCollectionTitle"><div class="confirm-dialog-copy"><div class="eyebrow">CONFIRM CLEAR</div><h2 id="clearCollectionTitle">Clear your collection?</h2><p>This will delete all saved scans from this device. This action can’t be undone.</p></div><div class="confirm-dialog-actions"><button id="cancelClear" class="copy-btn" type="button">Keep collection</button><button id="confirmClear" class="danger-btn" type="button">Clear all scans</button></div></dialog>
+<nav class="bottom-nav" aria-label="Main navigation"><button id="navScanner" class="active" type="button" aria-current="page"><span>⌾</span> Scanner</button><button id="navCollection" type="button"><span>▤</span> Collection</button><button id="navSettings" type="button"><span>⚙</span> Settings</button></nav>
 <div id="toast" class="toast"></div>
 </div><script src="data.js"></script><script src="app.js"></script></body></html>
