@@ -17,3 +17,10 @@ The rank is a stat-product IV rank, not PvPoke's battle/meta ranking. It does no
 ## Data
 
 Pokémon GO base stats and form names are loaded from [PvPoke's Game Master](https://github.com/pvpoke/pvpoke/blob/master/src/data/gamemaster.json). PvPoke's source is available under the MIT License; the notice is preserved in [LICENSE.pvpoke](LICENSE.pvpoke).
+
+
+## Settings and app cache
+
+Nickname formats and the Dark or Light theme are saved in localStorage under the app's settings key. The Scanner screen's **Reset app cache** action asks before deleting only CacheStorage entries named with IV Scout's `iv-scout-` prefix and the `iv-scout-data` Pokémon IndexedDB database, then reloads the app. It leaves the collection and settings intact and does not clear the browser's general cache.
+
+This repository contains only static app files; it has no build scripts or deployment workflow. The Scanner's app version, build identifier, and build time are therefore explicitly shown as unversioned, not generated, and not recorded. Maintain those static labels in `index.html` when a release process begins; do not treat them as generated release metadata.
