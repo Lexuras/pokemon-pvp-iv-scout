@@ -1,72 +1,374 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#101923" id="themeColor"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>IV Scout</title><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<div class="app-shell">
-<header class="topbar"><a class="brand" href="#" id="brandHome"><span class="brand-mark">✦</span><span>IV<span class="brand-light">SCOUT</span></span></a><button id="collectionTopNav" class="collection-top-nav" type="button">▤ Collection</button><button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙</button></header>
-<main>
-<div id="scannerScreen">
-<div class="layout-debug" aria-live="polite"><strong id="layoutStatus">Layout: Auto → Phone</strong><label class="layout-quick-switch" for="layoutQuickControl"><span>Quick switch</span><select id="layoutQuickControl" aria-label="Quick layout switch"><option value="auto">Auto</option><option value="phone">Phone</option><option value="website">Website</option></select></label></div>
-<section class="build-info" aria-label="Build information">
-  <div class="build-info-heading"><div class="eyebrow">APP INFO · STATIC METADATA</div><button id="resetCache" class="reset-cache-btn">Reset app cache</button></div>
-  <div class="build-info-fields"><div><span>App version</span><strong>Unversioned static app</strong></div><div><span>Build identifier</span><strong>Not generated</strong></div><div><span>Build time</span><strong>Not recorded</strong></div></div>
-  <p>Maintained manually in <code>index.html</code>; this checkout has no build or deployment workflow.</p>
-</section>
-<section class="intro"><div class="eyebrow"><span class="live-dot"></span> SCREENSHOT SCAN</div><h1>Check your Pokémon<br><span>before you power up.</span></h1><p>Upload an appraisal screenshot to fill in Pokémon details, CP, and IVs for a league rank check.</p></section>
-<section class="camera-card hidden">
-<div class="camera-top"><span><i class="pulse"></i> CAMERA PREVIEW</span><span id="cameraStatus">READY</span></div>
-<div class="camera-view" id="cameraView"><video id="video" autoplay playsinline muted></video><div class="camera-placeholder" id="cameraPlaceholder"><div class="phone-glyph">▯</div><strong>Your camera view</strong><span>Point at a Pokémon’s appraisal screen</span><button id="startCamera" class="camera-cta">Enable camera</button></div><div class="scan-frame"><b></b><b></b><b></b><b></b><div class="scan-line"></div></div><div class="view-hint">APPRAISAL SCREEN</div></div>
-<div class="camera-footer"><span>Live preview · enter appraisal IVs manually</span><button id="flipCamera" class="text-btn">↻ Flip camera</button></div>
-</section>
-<section class="upload-card"><div class="section-heading"><div><div class="eyebrow">SCREENSHOT SCAN</div><h2>Upload appraisal</h2></div><span class="upload-icon">▧</span></div><p class="upload-copy">Choose a Pokémon GO appraisal screenshot. We’ll read the name, CP, displayed HP and IV bars on this device. Check the Pokémon form too when names overlap.</p><label for="screenshotFile" class="upload-button">Choose screenshot <span>↑</span></label><input id="screenshotFile" type="file" accept="image/*" class="file-input"><div id="uploadStatus" class="upload-status">JPG or PNG screenshot · HEIC if supported by Safari</div><div id="uploadPreviewWrap" class="upload-preview-wrap hidden"><img id="uploadPreview" alt="Selected appraisal screenshot"><div id="scanProgress" class="scan-progress hidden"><div class="progress-track"><i id="progressBar"></i></div><span id="progressText">Preparing on-device OCR…</span></div></div><div id="ocrSummary" class="ocr-summary hidden"></div></section>
-<section class="entry-card"><div class="section-heading"><div><div class="eyebrow">QUICK ENTRY</div><h2>Pokémon details</h2></div><span class="step">01 <i>/</i> 02</span></div>
-<label class="field-label" for="pokemon">Pokémon or form</label><input id="pokemon" class="pokemon-search" list="pokemonList" placeholder="Search all Pokémon and forms…" autocomplete="off"><datalist id="pokemonList"></datalist><div id="dataStatus" class="data-status">Loading full Pokémon data…</div><div class="cp-entry"><label class="field-label" for="currentCp">Current CP <span>(used to rule out over-cap leagues)</span></label><input id="currentCp" type="number" min="10" max="10000" placeholder="Enter CP shown in Pokémon GO"></div><div class="hp-entry"><label class="field-label" for="currentHp">Pokémon HP <span>(current / max)</span></label><div class="hp-inputs"><input id="currentHp" type="number" min="0" max="500" placeholder="Current"><span>/</span><input id="maxHp" type="number" min="1" max="500" placeholder="Max"></div></div>
-<div class="iv-title"><span class="field-label">Appraisal IVs</span><span class="iv-note">Tap to adjust</span></div>
-<div class="iv-grid"><div class="iv-control"><div class="iv-head"><span>⚔ ATTACK</span><strong id="attackValue">0</strong></div><input id="attack" type="range" min="0" max="15" value="0"><div class="range-labels"><span>0</span><span>15</span></div></div><div class="iv-control"><div class="iv-head"><span>◈ DEFENSE</span><strong id="defenseValue">15</strong></div><input id="defense" type="range" min="0" max="15" value="15"><div class="range-labels"><span>0</span><span>15</span></div></div><div class="iv-control"><div class="iv-head"><span>♥ HP</span><strong id="hpValue">15</strong></div><input id="hp" type="range" min="0" max="15" value="15"><div class="range-labels"><span>0</span><span>15</span></div></div></div>
-<button id="analyze" class="primary-btn">Check PvP potential <span>→</span></button></section>
-<section id="results" class="results hidden"><div class="section-heading"><div><div class="eyebrow">SCAN RESULT</div><h2 id="resultName">Azumarill</h2></div><button id="dismiss" class="icon-btn">×</button></div><div class="league-list" id="leagueList"></div><div class="preview-note rank-method">Ranks compare all 4,096 IV combinations for this Pokémon form by maximum stat product under the league CP cap. They do not predict PvP battle performance.</div><div class="nickname-box"><div><div class="eyebrow">SUGGESTED NICKNAME</div><strong id="nickname">R1 GL</strong></div><button id="copyName" class="copy-btn">Copy</button></div><div id="nicknameHelp" class="preview-note"></div><button id="savePokemon" class="secondary-btn">＋ Add confirmed scan to collection</button></section>
-
-<div class="data-credit">Game data: <a href="https://github.com/pvpoke/pvpoke/blob/master/src/data/gamemaster.json" target="_blank" rel="noreferrer">PvPoke Game Master</a> · MIT License</div>
-</div>
-<section id="collectionScreen" class="collection-screen hidden" aria-labelledby="collectionTitle">
-<div class="section-heading collection-page-heading"><div><div class="eyebrow">YOUR COLLECTION</div><h2 id="collectionTitle">Scanned Pokémon</h2></div><span class="count" id="count">0</span></div>
-<div class="collection-controls">
-<label class="collection-field field-label" for="collectionSearch">Search Pokémon or form<input id="collectionSearch" class="collection-input" type="search" placeholder="Try a name or form…" autocomplete="off"></label>
-<div class="collection-filter-row">
-<label class="collection-field field-label" for="collectionLeague">League<select id="collectionLeague" class="collection-select"><option value="all">All leagues</option><option value="GL">Great League</option><option value="UL">Ultra League</option><option value="ML">Master League</option></select></label>
-<label class="collection-field field-label" for="collectionSort">Sort by<select id="collectionSort" class="collection-select"><option value="recent">Recently added</option><option value="rank">Best rank</option></select></label>
-</div>
-<div class="collection-actions"><span id="collectionSummary" class="collection-summary" aria-live="polite">0 saved scans</span><button id="clearCollectionBtn" class="clear-collection-btn" type="button" disabled>Clear collection</button></div>
-</div>
-<div id="collection" class="collection-list empty-state" aria-live="polite">Your confirmed scans will stay here on this device.</div>
-</section>
-<section id="settingsScreen" class="settings-screen hidden" aria-labelledby="settingsTitle">
-  <div class="settings-heading"><div><div class="eyebrow">PREFERENCES</div><h1 id="settingsTitle">Settings</h1></div><button id="settingsBack" class="text-btn back-btn">← Scanner</button></div>
-  <section class="settings-card" aria-labelledby="nicknameSettingsTitle">
-    <div class="section-heading"><div><div class="eyebrow">NICKNAME</div><h2 id="nicknameSettingsTitle">Generator format</h2></div></div>
-    <label class="field-label" for="nicknamePreset">Preset</label>
-    <div class="select-wrap"><select id="nicknamePreset"><option value="rank">PvP rank · R34 GL</option><option value="percent">IV percentage · 96%</option><option value="exact">Exact IVs · 15/14/14</option><option value="rank-iv">Rank + IVs · R34 GL 15/14/14</option><option value="custom">Custom template</option></select><span>⌄</span></div>
-    <div id="customTemplateWrap" class="custom-template-wrap hidden"><label class="field-label" for="customTemplate">Template</label><input id="customTemplate" class="custom-input" type="text" autocomplete="off" spellcheck="false" placeholder="R{rank} {league}"><p class="token-help">Tokens: <code>{rank}</code> <code>{league}</code> <code>{dex}</code> <code>{name}</code> <code>{attack}</code> <code>{defense}</code> <code>{hp}</code> <code>{ivPercent}</code></p></div>
-    <div class="settings-preview"><span>Live preview</span><strong id="nicknamePreview">R— GL</strong></div>
-    <p class="preview-note">IV percentage rounds the total IVs out of 45 to the nearest whole percent; 43/45 displays as 96%. Your selected preset or custom template is saved on this device.</p>
-  </section>
-  <section class="settings-card" aria-labelledby="appearanceTitle">
-    <div class="section-heading"><div><div class="eyebrow">DISPLAY</div><h2 id="appearanceTitle">Appearance</h2></div></div>
-    <fieldset class="theme-options"><legend class="field-label">Color theme</legend><label class="theme-option"><input type="radio" name="theme" value="dark"><span><strong>Dark</strong><small>Default</small></span></label><label class="theme-option"><input type="radio" name="theme" value="light"><span><strong>Light</strong><small>Bright backgrounds</small></span></label></fieldset>
-  </section>
-  <section class="settings-card" aria-labelledby="layoutSettingsTitle">
-    <div class="section-heading"><div><div class="eyebrow">LAYOUT</div><h2 id="layoutSettingsTitle">Screen layout</h2></div></div>
-    <fieldset class="layout-options"><legend class="field-label">Choose how IV Scout fits your screen</legend>
-      <label class="layout-mode-option"><input type="radio" name="layoutMode" value="auto"><span><strong>Auto</strong><small>Choose from device and viewport</small></span></label>
-      <label class="layout-mode-option"><input type="radio" name="layoutMode" value="phone"><span><strong>Phone</strong><small>Compact single column</small></span></label>
-      <label class="layout-mode-option"><input type="radio" name="layoutMode" value="website"><span><strong>Website</strong><small>Wider two column layout</small></span></label>
-    </fieldset>
-  </section>
-  <p class="settings-footnote">Settings and your collection stay on this device.</p>
-</section>
-</main><dialog id="clearCollectionDialog" class="confirm-dialog" aria-labelledby="clearCollectionTitle"><div class="confirm-dialog-copy"><div class="eyebrow">CONFIRM CLEAR</div><h2 id="clearCollectionTitle">Clear your collection?</h2><p>This will delete all saved scans from this device. This action can’t be undone.</p></div><div class="confirm-dialog-actions"><button id="cancelClear" class="copy-btn" type="button">Keep collection</button><button id="confirmClear" class="danger-btn" type="button">Clear all scans</button></div></dialog>
-<nav class="bottom-nav" aria-label="Main navigation"><button id="navScanner" class="active" type="button" aria-current="page"><span>⌾</span> Scanner</button><button id="navCollection" type="button"><span>▤</span> Collection</button><button id="navSettings" type="button"><span>⚙</span> Settings</button></nav>
-<div id="toast" class="toast"></div>
-</div><script src="data.js"></script><script src="app.js"></script></body></html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#101923" id="themeColor">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>IV Scout</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar"><a class="brand" href="#" id="brandHome"><span class="brand-mark">✦</span><span>IV<span class="brand-light">SCOUT</span></span></a>
+        <button id="collectionTopNav" class="collection-top-nav" type="button">▤ Collection
+        </button>
+        <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙
+        </button>
+      </header>
+      <main>
+        <div id="scannerScreen">
+          <div class="layout-debug" aria-live="polite"><strong id="layoutStatus">Layout: Auto → Phone</strong>
+            <label class="layout-quick-switch" for="layoutQuickControl"><span>Quick switch</span>
+              <select id="layoutQuickControl" aria-label="Quick layout switch">
+                <option value="auto">Auto
+                </option>
+                <option value="phone">Phone
+                </option>
+                <option value="website">Website
+                </option>
+              </select>
+            </label>
+          </div>
+          <section class="build-info" aria-label="Build information">
+            <div class="build-info-heading">
+              <div class="eyebrow">APP INFO · STATIC METADATA
+              </div>
+              <button id="resetCache" class="reset-cache-btn" type="button">Reset app cache
+              </button>
+            </div>
+            <div class="build-info-fields">
+              <div><span>App version</span><strong>Unversioned static app</strong>
+              </div>
+              <div><span>Build identifier</span><strong>Not generated</strong>
+              </div>
+              <div><span>Build time</span><strong>Not recorded</strong>
+              </div>
+            </div>
+            <p>Maintained manually in <code>index.html</code>; this checkout has no build or deployment workflow.
+            </p>
+          </section>
+          <section class="intro">
+            <div class="eyebrow"><span class="live-dot"></span> SCREENSHOT SCAN
+            </div>
+            <h1>Check your Pokémon<br><span>before you power up.</span>
+            </h1>
+            <p>Upload an appraisal screenshot to fill in Pokémon details, CP, and IVs for a league rank check.
+            </p>
+          </section>
+          <section class="camera-card hidden">
+            <div class="camera-top"><span><i class="pulse"></i> CAMERA PREVIEW</span><span id="cameraStatus">READY</span>
+            </div>
+            <div class="camera-view" id="cameraView">
+              <video id="video" autoplay playsinline muted>
+              </video>
+              <div class="camera-placeholder" id="cameraPlaceholder">
+                <div class="phone-glyph">▯
+                </div><strong>Your camera view</strong><span>Point at a Pokémon’s appraisal screen</span>
+                <button id="startCamera" class="camera-cta" type="button">Enable camera
+                </button>
+              </div>
+              <div class="scan-frame">
+                <b>
+                </b>
+                <b>
+                </b>
+                <b>
+                </b>
+                <b>
+                </b>
+                <div class="scan-line">
+                </div>
+              </div>
+              <div class="view-hint">APPRAISAL SCREEN
+              </div>
+            </div>
+            <div class="camera-footer"><span>Live preview · enter appraisal IVs manually</span>
+              <button id="flipCamera" class="text-btn" type="button">↻ Flip camera
+              </button>
+            </div>
+          </section>
+          <section class="upload-card">
+            <div class="section-heading">
+              <div>
+                <div class="eyebrow">SCREENSHOT SCAN
+                </div>
+                <h2>Upload appraisal
+                </h2>
+              </div><span class="upload-icon">▧</span>
+            </div>
+            <p class="upload-copy">Choose a Pokémon GO appraisal screenshot. We’ll read the name, CP, displayed HP and IV bars on this device. Check the Pokémon form too when names overlap.
+            </p>
+            <label for="screenshotFile" class="upload-button">Choose screenshot <span>↑</span>
+            </label>
+            <input id="screenshotFile" type="file" accept="image/*" class="file-input">
+            <div id="uploadStatus" class="upload-status">JPG or PNG screenshot · HEIC if supported by Safari
+            </div>
+            <div id="uploadPreviewWrap" class="upload-preview-wrap hidden">
+              <img id="uploadPreview" alt="Selected appraisal screenshot">
+              <div id="scanProgress" class="scan-progress hidden">
+                <div class="progress-track"><i id="progressBar"></i>
+                </div><span id="progressText">Preparing on-device OCR…</span>
+              </div>
+            </div>
+            <div id="ocrSummary" class="ocr-summary hidden">
+            </div>
+          </section>
+          <section class="entry-card">
+            <div class="section-heading">
+              <div>
+                <div class="eyebrow">QUICK ENTRY
+                </div>
+                <h2>Pokémon details
+                </h2>
+              </div><span class="step">01 <i>/</i> 02</span>
+            </div>
+            <label class="field-label" for="pokemon">Pokémon or form
+            </label>
+            <input id="pokemon" class="pokemon-search" list="pokemonList" placeholder="Search all Pokémon and forms…" autocomplete="off">
+            <datalist id="pokemonList">
+            </datalist>
+            <div id="dataStatus" class="data-status">Loading full Pokémon data…
+            </div>
+            <div class="cp-entry">
+              <label class="field-label" for="currentCp">Current CP <span>(used to rule out over-cap leagues)</span>
+              </label>
+              <input id="currentCp" type="number" min="10" max="10000" placeholder="Enter CP shown in Pokémon GO">
+            </div>
+            <div class="hp-entry">
+              <label class="field-label" for="currentHp">Pokémon HP <span>(current / max)</span>
+              </label>
+              <div class="hp-inputs">
+                <input id="currentHp" type="number" min="0" max="500" placeholder="Current"><span>/</span>
+                <input id="maxHp" type="number" min="1" max="500" placeholder="Max">
+              </div>
+            </div>
+            <div class="iv-title"><span class="field-label">Appraisal IVs</span><span class="iv-note">Tap to adjust</span>
+            </div>
+            <div class="iv-grid">
+              <div class="iv-control">
+                <div class="iv-head"><span>⚔ ATTACK</span><strong id="attackValue">0</strong>
+                </div>
+                <input id="attack" type="range" aria-label="Attack IV" min="0" max="15" value="0">
+                <div class="range-labels"><span>0</span><span>15</span>
+                </div>
+              </div>
+              <div class="iv-control">
+                <div class="iv-head"><span>◈ DEFENSE</span><strong id="defenseValue">15</strong>
+                </div>
+                <input id="defense" type="range" aria-label="Defense IV" min="0" max="15" value="15">
+                <div class="range-labels"><span>0</span><span>15</span>
+                </div>
+              </div>
+              <div class="iv-control">
+                <div class="iv-head"><span>♥ HP</span><strong id="hpValue">15</strong>
+                </div>
+                <input id="hp" type="range" aria-label="HP IV" min="0" max="15" value="15">
+                <div class="range-labels"><span>0</span><span>15</span>
+                </div>
+              </div>
+            </div>
+            <button id="analyze" class="primary-btn" type="button">Check PvP potential <span>→</span>
+            </button>
+          </section>
+          <section id="results" class="results hidden">
+            <div class="section-heading">
+              <div>
+                <div class="eyebrow">SCAN RESULT
+                </div>
+                <h2 id="resultName">Azumarill
+                </h2>
+              </div>
+              <button id="dismiss" class="icon-btn" type="button" aria-label="Dismiss scan results">×
+              </button>
+            </div>
+            <div class="league-list" id="leagueList">
+            </div>
+            <div class="preview-note rank-method">Ranks compare all 4,096 IV combinations for this Pokémon form by maximum stat product under the league CP cap. They do not predict PvP battle performance.
+            </div>
+            <div class="nickname-box">
+              <div>
+                <div class="eyebrow">SUGGESTED NICKNAME
+                </div><strong id="nickname">R1 GL</strong>
+              </div>
+              <button id="copyName" class="copy-btn" type="button">Copy
+              </button>
+            </div>
+            <div id="nicknameHelp" class="preview-note">
+            </div>
+            <button id="savePokemon" class="secondary-btn" type="button">＋ Add confirmed scan to collection
+            </button>
+          </section>
+          <div class="data-credit">Game data: <a href="https://github.com/pvpoke/pvpoke/blob/master/src/data/gamemaster.json" target="_blank" rel="noreferrer">PvPoke Game Master</a> · MIT License
+          </div>
+        </div>
+        <section id="collectionScreen" class="collection-screen hidden" aria-labelledby="collectionTitle">
+          <div class="section-heading collection-page-heading">
+            <div>
+              <div class="eyebrow">YOUR COLLECTION
+              </div>
+              <h2 id="collectionTitle">Scanned Pokémon
+              </h2>
+            </div><span class="count" id="count">0</span>
+          </div>
+          <div class="collection-controls">
+            <label class="collection-field field-label" for="collectionSearch">Search Pokémon or form
+              <input id="collectionSearch" class="collection-input" type="search" placeholder="Try a name or form…" autocomplete="off">
+            </label>
+            <div class="collection-filter-row">
+              <label class="collection-field field-label" for="collectionLeague">League
+                <select id="collectionLeague" class="collection-select">
+                  <option value="all">All leagues
+                  </option>
+                  <option value="GL">Great League
+                  </option>
+                  <option value="UL">Ultra League
+                  </option>
+                  <option value="ML">Master League
+                  </option>
+                </select>
+              </label>
+              <label class="collection-field field-label" for="collectionSort">Sort by
+                <select id="collectionSort" class="collection-select">
+                  <option value="recent">Recently added
+                  </option>
+                  <option value="rank">Best rank
+                  </option>
+                </select>
+              </label>
+            </div>
+            <div class="collection-actions"><span id="collectionSummary" class="collection-summary" aria-live="polite">0 saved scans</span>
+              <button id="clearCollectionBtn" class="clear-collection-btn" type="button" disabled>Clear collection
+              </button>
+            </div>
+          </div>
+          <div id="collection" class="collection-list empty-state" aria-live="polite">Your confirmed scans will stay here on this device.
+          </div>
+        </section>
+        <section id="settingsScreen" class="settings-screen hidden" aria-labelledby="settingsTitle">
+          <div class="settings-heading">
+            <div>
+              <div class="eyebrow">PREFERENCES
+              </div>
+              <h1 id="settingsTitle">Settings
+              </h1>
+            </div>
+            <button id="settingsBack" class="text-btn back-btn" type="button">← Scanner
+            </button>
+          </div>
+          <section class="settings-card" aria-labelledby="nicknameSettingsTitle">
+            <div class="section-heading">
+              <div>
+                <div class="eyebrow">NICKNAME
+                </div>
+                <h2 id="nicknameSettingsTitle">Generator format
+                </h2>
+              </div>
+            </div>
+            <label class="field-label" for="nicknamePreset">Preset
+            </label>
+            <div class="select-wrap">
+              <select id="nicknamePreset">
+                <option value="rank">PvP rank · R34 GL
+                </option>
+                <option value="percent">IV percentage · 96%
+                </option>
+                <option value="exact">Exact IVs · 15/14/14
+                </option>
+                <option value="rank-iv">Rank + IVs · R34 GL 15/14/14
+                </option>
+                <option value="custom">Custom template
+                </option>
+              </select><span>⌄</span>
+            </div>
+            <div id="customTemplateWrap" class="custom-template-wrap hidden">
+              <label class="field-label" for="customTemplate">Template
+              </label>
+              <input id="customTemplate" class="custom-input" type="text" autocomplete="off" spellcheck="false" placeholder="R{rank} {league}">
+              <p class="token-help">Tokens: <code>{rank}</code> <code>{league}</code> <code>{dex}</code> <code>{name}</code> <code>{attack}</code> <code>{defense}</code> <code>{hp}</code> <code>{ivPercent}</code>
+              </p>
+            </div>
+            <div class="settings-preview"><span>Live preview</span><strong id="nicknamePreview">R— GL</strong>
+            </div>
+            <p class="preview-note">IV percentage rounds the total IVs out of 45 to the nearest whole percent; 43/45 displays as 96%. Your selected preset or custom template is saved on this device.
+            </p>
+          </section>
+          <section class="settings-card" aria-labelledby="appearanceTitle">
+            <div class="section-heading">
+              <div>
+                <div class="eyebrow">DISPLAY
+                </div>
+                <h2 id="appearanceTitle">Appearance
+                </h2>
+              </div>
+            </div>
+            <fieldset class="theme-options">
+              <legend class="field-label">Color theme
+              </legend>
+              <label class="theme-option">
+                <input type="radio" name="theme" value="dark"><span><strong>Dark</strong><small>Default</small></span>
+              </label>
+              <label class="theme-option">
+                <input type="radio" name="theme" value="light"><span><strong>Light</strong><small>Bright backgrounds</small></span>
+              </label>
+            </fieldset>
+          </section>
+          <section class="settings-card" aria-labelledby="layoutSettingsTitle">
+            <div class="section-heading">
+              <div>
+                <div class="eyebrow">LAYOUT
+                </div>
+                <h2 id="layoutSettingsTitle">Screen layout
+                </h2>
+              </div>
+            </div>
+            <fieldset class="layout-options">
+              <legend class="field-label">Choose how IV Scout fits your screen
+              </legend>
+              <label class="layout-mode-option">
+                <input type="radio" name="layoutMode" value="auto"><span><strong>Auto</strong><small>Choose from device and viewport</small></span>
+              </label>
+              <label class="layout-mode-option">
+                <input type="radio" name="layoutMode" value="phone"><span><strong>Phone</strong><small>Compact single column</small></span>
+              </label>
+              <label class="layout-mode-option">
+                <input type="radio" name="layoutMode" value="website"><span><strong>Website</strong><small>Wider two column layout</small></span>
+              </label>
+            </fieldset>
+          </section>
+          <p class="settings-footnote">Settings and your collection stay on this device.
+          </p>
+        </section>
+      </main>
+      <dialog id="clearCollectionDialog" class="confirm-dialog" aria-labelledby="clearCollectionTitle">
+        <div class="confirm-dialog-copy">
+          <div class="eyebrow">CONFIRM CLEAR
+          </div>
+          <h2 id="clearCollectionTitle">Clear your collection?
+          </h2>
+          <p>This will delete all saved scans from this device. This action can’t be undone.
+          </p>
+        </div>
+        <div class="confirm-dialog-actions">
+          <button id="cancelClear" class="copy-btn" type="button">Keep collection
+          </button>
+          <button id="confirmClear" class="danger-btn" type="button">Clear all scans
+          </button>
+        </div>
+      </dialog>
+      <nav class="bottom-nav" aria-label="Main navigation">
+        <button id="navScanner" class="active" type="button" aria-current="page"><span>⌾</span> Scanner
+        </button>
+        <button id="navCollection" type="button"><span>▤</span> Collection
+        </button>
+        <button id="navSettings" type="button"><span>⚙</span> Settings
+        </button>
+      </nav>
+      <div id="toast" class="toast">
+      </div>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

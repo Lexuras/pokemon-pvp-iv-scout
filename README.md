@@ -1,26 +1,55 @@
 # IV Scout
 
-An iPhone-oriented installable web app for uploading a Pokémon GO appraisal screenshot, confirming detected details, and checking stat-product ranks by Pokémon form.
+IV Scout is an installable static web app for uploading a Pokémon GO appraisal screenshot, checking the detected details, and comparing stat-product ranks by Pokémon form.
 
-## Run it
+## Project structure
 
-Serve this directory from an HTTPS origin, then open it in iPhone Safari. Camera access and service workers require a secure origin. For a quick Mac-only preview, `python3 -m http.server 8000` works for layout and manual entry, but it does not provide iPhone camera access or installability.
+```text
+index.html                 Semantic page structure and accessible controls
+styles.css                 Design tokens, base styles, components, themes, and responsive layouts
+app.js                     Small composition entry point for the app modules
+modules/
+  pokemon-data.js           Game Master loading, IndexedDB cache, CP, stats, and rank calculations
+  ocr.js                    On-device screenshot recognition and IV bar reading
+  scanner.js                Camera, manual entry, scan results, and save-to-collection flow
+  collection.js             Collection display, search, sorting, deletion, and clearing
+  settings.js               Settings state, theme, layout selection, and responsive detection
+  navigation.js             Scanner, collection, and Settings screen navigation
+  cache-controls.js         App cache and Pokémon data reset action
+  nickname.js               Nickname template formatting
+  storage.js                Existing Settings and collection localStorage records
+  dom.js                    Small shared DOM, escaping, toast, and motion helpers
+sw.js                       Offline precache and static asset cache behavior
+```
 
-The app downloads the PvPoke Game Master when online and stores normalized Pokémon data in IndexedDB for later offline use. The first successful load requires internet access. Screenshot OCR runs locally in the browser with Tesseract.js; it uses no API key and does not upload the image. On first use, the OCR library, WebAssembly core, and English language model are downloaded from CDNs. Offline OCR is available only if the browser retained those downloaded files. Name, CP, and displayed current/max HP are read from cropped appraisal-screen areas; IV values are read from the three colored appraisal bars and should still be reviewed before saving. If multiple forms share the same displayed name in Pokémon GO, confirm the form in the Pokémon field before trusting its rank.
+The JavaScript files use browser-native ES modules. Pokémon data and rank calculations stay independent of DOM updates. Settings remain under `iv-scout-settings`; collection records remain under `iv-scout-collection` with their existing fields. Screenshot OCR runs on-device. Game Master data is fetched when online and falls back to the existing IndexedDB cache while offline.
+
+## Run the static app locally
+
+From this directory, start a local HTTP server:
+
+```sh
+python3 -m http.server 8000
+```
+
+Open [http://localhost:8000](http://localhost:8000). The app has no build step or package installation. A local HTTP server supports the service worker and local app cache; camera access and installation on a phone require an HTTPS origin. For iPhone Safari, deploy the static files to HTTPS.
+
+The first successful data load requires internet access. Screenshot OCR uses Tesseract.js in the browser and does not upload the image. On first use, its library, WebAssembly core, and English language model are downloaded from CDNs; offline OCR depends on the browser retaining those files. Review the detected name, form, CP, HP, and IV values before saving a scan.
 
 ## Ranking method
 
-For the selected Pokémon form, the app evaluates each of the 4,096 Attack/Defense/Stamina IV spreads. It picks each spread's highest half-level at or below the league CP limit (up to level 50), computes the Pokémon GO CP and battle stats, and sorts by stat product. Great League and Ultra League are ruled out when the entered current CP is above their caps. Master League has no CP cap. Rank is species/form-specific; the same IVs can rank differently for an unevolved Pokémon and its evolution.
+For the selected Pokémon form, the app evaluates all 4,096 Attack/Defense/HP IV spreads. It picks each spread's highest half-level at or below the league CP limit (up to level 50), computes the Pokémon GO CP and battle stats, and sorts by stat product. Great League and Ultra League are ruled out when the entered current CP is above their caps. Master League has no CP cap. Rank is species/form-specific; the same IVs can rank differently for an unevolved Pokémon and its evolution.
 
 The rank is a stat-product IV rank, not PvPoke's battle/meta ranking. It does not account for moves, shadows' damage modifiers, acquisition-level floors, or Best Buddy level 51.
 
-## Data
+## Data and cache behavior
 
 Pokémon GO base stats and form names are loaded from [PvPoke's Game Master](https://github.com/pvpoke/pvpoke/blob/master/src/data/gamemaster.json). PvPoke's source is available under the MIT License; the notice is preserved in [LICENSE.pvpoke](LICENSE.pvpoke).
 
+The Scanner's **Reset app cache** action deletes only CacheStorage entries with the `iv-scout-` prefix and the `iv-scout-data` Pokémon IndexedDB database, then reloads the app. It leaves the collection and Settings in localStorage intact and does not clear the browser's general cache.
 
-## Settings and app cache
+This repository contains only static app files; it has no build scripts or deployment workflow. The Scanner therefore shows the static version/build labels as unversioned and not generated. Maintain those labels in `index.html` if a release process is added later.
 
-Nickname formats and the Dark or Light theme are saved in localStorage under the app's settings key. The Scanner screen's **Reset app cache** action asks before deleting only CacheStorage entries named with IV Scout's `iv-scout-` prefix and the `iv-scout-data` Pokémon IndexedDB database, then reloads the app. It leaves the collection and settings intact and does not clear the browser's general cache.
+## Future Node/Vite integration
 
-This repository contains only static app files; it has no build scripts or deployment workflow. The Scanner's app version, build identifier, and build time are therefore explicitly shown as unversioned, not generated, and not recorded. Maintain those static labels in `index.html` when a release process begins; do not treat them as generated release metadata.
+The module boundaries are already standard ES module imports, so a future Vite site can use `index.html` and `app.js` as its initial entry point and then move these modules into the site's source tree. Configure the app's data and public asset paths for the chosen deployment base, and keep the service worker precache list aligned with emitted files. A future design system can replace or supplement `styles.css` with Tailwind or another styling approach without moving Pokémon calculations, OCR, storage, and screen controllers into one global script.
